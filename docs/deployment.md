@@ -23,9 +23,9 @@ The compose stack is a local-development setup by default. It binds the frontend
 
 ## Vercel frontend with a Docker backend
 
-Vercel is configured to host the Vite frontend from the `frontend/` directory; see `frontend/vercel.json`. The FastAPI API and the APScheduler reminder worker should remain separate Docker services on a container host, with a managed PostgreSQL database and durable private upload storage. Vercel serverless functions are request-driven and are not a replacement for the continuously running APScheduler worker. Do not deploy the Compose PostgreSQL service to Vercel.
+Vercel is configured to build the Vite frontend from the repository root using `vercel.json`. The FastAPI API and the APScheduler reminder worker should remain separate Docker services on a container host, with a managed PostgreSQL database and durable private upload storage. Vercel serverless functions are request-driven and are not a replacement for the continuously running APScheduler worker. Do not deploy the Compose PostgreSQL service to Vercel.
 
-1. Push this project to a private GitHub repository. Import that repository in Vercel and set **Root Directory** to `frontend`. The Vercel configuration builds with `npm run build` and serves `dist/`; the rewrite supports client-side routes.
+1. Import [YY018/EventReminder](https://github.com/YY018/EventReminder) in Vercel and keep **Root Directory** at the repository root (`./`). The root `vercel.json` installs/builds under `frontend/` and serves `frontend/dist/`; the rewrite supports client-side routes. This source repository is public; do not place secrets in it.
 2. Deploy the backend Docker image as a web service and a separate worker service on a container platform. Use a managed PostgreSQL database. The web service runs `alembic upgrade head` before serving; start the worker after the API deployment/migration completes, and give both services the same database URL and application secrets. Mount persistent private storage for retained uploads.
 3. Assign related custom hostnames, for example `app.example.com` to Vercel and `api.example.com` to the backend. Both should be HTTPS and under the same registrable domain. The authentication cookies are `SameSite=Lax`; unrelated default domains such as `*.vercel.app` and `*.onrender.com` are cross-site and may prevent cookie authentication in browsers.
 4. Set Vercel Production environment variables:
@@ -37,7 +37,7 @@ Vercel is configured to host the Vite frontend from the `frontend/` directory; s
    - SMTP, Anthropic, VAPID private key, and VAPID claim email as needed
 6. Configure the API host's CORS allow-origin to exactly `https://app.example.com` (the application reads `FRONTEND_ORIGIN`) and allow credentialed requests. Configure the custom `api.example.com` domain on the backend host. Then redeploy the Vercel frontend so its build contains the API URL, and verify `https://api.example.com/healthz`, sign-up/login, event CRUD, exports, and reminder delivery.
 
-The project folder is not yet a Git repository and there is no Vercel account linked in this environment, so an account-specific deployment cannot be completed from here. Do not put secrets in Vercel's build logs, Git, or chat; enter them only in the respective provider's encrypted environment-variable settings. Vercel hosts the frontend and serves it globally from its CDN; Docker provides a portable way to run the backend and persistent worker, but does not itself make the app run at the edge.
+Do not put secrets in Vercel's build logs, Git, or chat; enter them only in the respective provider's encrypted environment-variable settings. Vercel hosts the frontend and serves it globally from its CDN; Docker provides a portable way to run the backend and persistent worker, but does not itself make the app run at the edge.
 
 ## VPS with Caddy and HTTPS
 
