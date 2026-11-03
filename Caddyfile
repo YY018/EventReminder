@@ -1,0 +1,7 @@
+{$APP_DOMAIN} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+	}
+	reverse_proxy frontend:80
+}
